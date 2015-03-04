@@ -64,7 +64,7 @@ You should have:
 
 MongoDB is a JSON database that stores JSON "documents" in collections.  The main data unit is a JSON object (i.e. a "document") which are organized by named collections.
 
-# 2.1 Setup a Database, Starting and Stopping #
+# 2.1 Setup a Database, Starting, and Stopping #
 
 If you haven't started MongoDB yet, there are two scripts to help you:
 
@@ -78,13 +78,13 @@ To get setup:
  3. Run `setup.sh` in that directory.
  4. Run `forkdb.sh` to start MongoDB.
  
- For example (assuming this directory):
+For example (assuming this directory):
  
-     mkdir test
-     cp mongo.conf test
-     cd test
-     ../setup.sh
-     ../forkdb.sh
+    mkdir test
+    cp mongo.conf test
+    cd test
+    ../setup.sh
+    ../forkdb.sh
      
 You should be able to confirm MongoDB is running by examining the `mongo.pid` file and looking for the process with the same identifier.
 
@@ -188,6 +188,165 @@ The `find()` method returns a [Cursor instance](http://mongodb.github.io/node-mo
 manipulate in various ways.  The argument is a "query".  In this case, it specifies a field value that must match exactly.
 
 # 3. MarkLogic #
+
+Note: For the various code in this section we'll use the following logging functionss:
+
+    var logError = function(error) { console.log(JSON.stringify(error, null, 2)); }
+    var dumpResult = function(results) { results.forEach(function(result) { console.log(JSON.stringify(result.content, null, 2)); }); };
+
+Also, refer to the [Node.js Application Developer's Guide](http://docs.marklogic.com/guide/node-dev) and the [Node.js API](http://docs.marklogic.com/jsdoc/index.html) for 
+more information about the facilities described here for MarkLogic.
+
+## 3.1 Creating a Database ##
+
+You'll see that there are many options and features for databases.  You can safely ignore many of these features at this point but you do have
+to understand a bit about the MarkLogic architure.
+
+Databases use a collection of forests to store their actual data.  Forests are essentially disk-based storage.  A forest is made up of a set of stands 
+that are managed automatically by the database.  As information in your database changes, the stands are replicated by a merge process.  This allows the
+database to be both fast and consistent whilst achieving the ability to support ACID transactions.
+
+To create a database, you need to:
+
+   * create a database
+   * create and assign forests to the database for storage
+   
+The general rule of thumb is three forests per database.
+
+Once you started the MarkLogic server you'll want to create a database for this activity:
+
+  1. Visit http://localhost:8001 in your browser.
+  2. Click on "Databases" in the tree navigation on the left.
+  3. Click on the "Create" tab.
+  4. Type in 'tweets' in the "database name" field.
+  5. Scroll through the options and turn on "word searches" and "collection lexicon".
+  6. Click on "OK" to create the database.
+  
+You now need to create forests for the database:
+
+  1. If you do not have the database selected in the tree navigation on the left, select the "tweets" database we just created.
+  2. Select "Forests" from the navigation.
+  3. Click on "Create a Forest".
+  4. Type in "tweets-1" in the "forest name" field and leave all the other fields alone.
+  5. Click on the "More Forests" button below to show another creation form.
+  6. Type in "tweets-2" in the "forest name" field and leave all the other fields alone.
+  7. Click on the "More Forests" button again to show another creation form.
+  8. Type in "tweets-3" in the "forest name" field and leave all the other fields alone.
+  9. Click on the "OK" button to create the three forests.
+  10. Select all the forests in the "Configure Forests in a Database" view.
+  11. Click on "OK" to attach the three newly created forests to the database.
+  
+## 3.2 Configuring connections ##
+
+MarkLogic does not have one single default protocol for communication.  Instead, it supports a variety of connection methods of REST (HTTP), WebDAV, XDBC, and ODBC.  
+For this activity, you need to configure a REST connection to your database so that Node can communicate with the MarkLogic server.
+
+You cannot configure a REST end point through the admin console.  To do so, you must sent a POST:
+
+   curl -X POST --anyauth --user admin:admin -d @rest-api.json -H "Content-Type: application/json" http://127.0.0.1:8002/LATEST/rest-apis
+   
+with the configuration information in a JSON document [rest-api.json](rest-api.json):
+
+    { "rest-api": {
+         "name": "RESTstop",
+         "database": "tweets",
+         "port": "8888"
+       }
+    }
+    
+You can test that you've done so correctly by accessing a simple REST API URI:
+
+    $ curl --anyauth -u admin:admin http://127.0.0.1:8888/v1/values
+    <rapi:values-list xmlns:rapi="http://marklogic.com/rest-api"/>
+
+## 3.3 Connecting to a database ##
+
+You can connect to a database by using the connection point and credentials you created previously:
+
+    var marklogic = require('marklogic');
+    var db = marklogic.createDatabaseClient({ host: 'localhost', port: '8888', user: 'admin', password: 'admin', authType: "DIGEST"});
+   
+In reality, this just configures the client.  Each connection over the protocol you are using will send authentication 
+information.  In the above case, a request will use a HTTP DIGEST challenge response.
+
+## 3.4 Inserting Data ##
+
+MarkLogic supports a variety of data formats other than just JSON.  In this activity, we'll focus on the ability to store JSON data.
+
+Documents can be written directly to the database simplying calling `write()` on `db.documents`:
+
+    var docs = [ { uri: "/test/A.json", content: { id: "A", animal: "monkey" } }, { uri: "/test/B.json", content: { id: "B", animal: "dog" } }, { uri: "/test/C.json", content: { id: "C", animal: "cat" } } ];
+    db.documents.write(docs).result(
+       function(response) { response.documents.forEach(function(document) { console.log("Stored "+document.uri); }); },
+       logError
+    );
+    
+The method takes a single document description or an array of descriptions.
+
+The description must have a `uri` property but may contain other metadata.  The most common options are:
+
+   * `uri` — the URI of the document being stored
+   * `content` — the JSON content object
+   * `contentType` — the media type of the document (typically application/json) 
+   * `collections` — an array of collection URIs to which this document belongs
+
+You can update the metadata for a document by just omitting the `content` property.  The content of the document will remain the
+same but any other metadata provided will be replaced by the operation.
+
+## 3.5 Deleting Data ##
+
+You can delete a single document by URI:
+
+    db.documents.remove('/test/D.json').result(
+       function(response) {
+          console.log(JSON.stringify(response));
+       } 
+    );
+    
+Or a whole collection by URI:
+
+    db.documents.removeAll({ collection: "/tests"}).result(
+       function(response) {
+          console.log(JSON.stringify(response));
+       } 
+    );
+
+## 3.6 Querying Data ##
+
+Through the Node.js API, queries built from functional expressions that compile into XQuery 
+underneath.  A call to `db.documents.query()` returns a set of documents (or portions of them) 
+that match your query.  From the query object you can specify various slices (partitions, portions,
+etc.) that let you subset the matching results.
+
+Note: we'll be using this abbreviation for the marklogic.queryBuilder API:
+
+    var qb = marklogic.queryBuilder;
+
+In this section, well use the following helper function"
+
+A simple query by example can be constructed as:
+
+    db.documents.query(qb.where(qb.byExample( { id: 'A' }))).result(dumpResult);
+   
+This will return all the documents that have a 'test' property that has the value 'A'.
+
+In query by example, you can use combinations of properties and structures as well:
+
+    db.documents.query(qb.where(qb.byExample( { id: 'A', animal: 'monkey' }))).result(dumpResult);
+
+Results can be paginated by selecting a particular slice.  For example, the first three:
+ 
+    db.documents.query(qb.where(qb.byExample( { id: 'A' })).slice(1,3)).result(dumpResult);
+   
+You can also use the `slice()` method to extract portions of the results.  This is useful if the resulting document
+is complex or large and you only need a small portion.
+
+The `extract` method takes a path expression (see [Traversing JSON Documents Using XPath](https://docs.marklogic.com/guide/app-dev/json#id_10326) ):
+
+    db.documents.query(qb.where(qb.byExample( { id: 'A' })).slice(qb.extract("/animal"))).result(dumpResult);
+    
+You can read more about how to manipulate the query results in [Refining Query Results](http://docs.marklogic.com/guide/node-dev/search#id_24160).
+
 
 # 4. Activity #
 
