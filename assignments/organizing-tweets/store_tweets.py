@@ -23,8 +23,6 @@ def insert_tweet_into_mongo(tweet, collection):
 
     collection.insert(tweet_doc)
 
-
-
 conn=pymongo.MongoClient()
 db = conn.hw3
 db.drop_collection('tweets')

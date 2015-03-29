@@ -26,8 +26,8 @@ pipeline = [
 
            ]
 
-query1 = db.tweets.aggregate(pipeline)
-print query1['result']
+query_hours = db.tweets.aggregate(pipeline)
+print query_hours['result']
 
 pipeline = [
 
@@ -44,8 +44,8 @@ pipeline = [
 
            ]
 
-query2 = db.tweets.aggregate(pipeline)
-print query2['result']
+query_tags = db.tweets.aggregate(pipeline)
+print query_tags['result']
 
 pipeline = [
 
@@ -64,8 +64,8 @@ pipeline = [
             ]
 
 
-query3 = db.tweets.aggregate(pipeline)
-print query3['result']
+query_users = db.tweets.aggregate(pipeline)
+print query_users['result']
 
 
 

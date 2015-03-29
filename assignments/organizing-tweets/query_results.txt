@@ -1,14 +1,32 @@
-[{u'count': 21, u'_id': u'15-02-15 09:00'}, {u'count': 13, u'_id': u'15-02-15 14:00'}, {u'count': 29, u'_id': u'15-02-14 16:00'}, {u'count': 56, u'_id': u'15-02-15 10:00'}, {u'count': 41, u'_id': u'15-02-15 15:00'}, {u'count': 55, u'_id': u'15-02-14 10:00'}, {u'count': 19, u'_id': u'15-02-14 11:00'}, {u'count': 66, u'_id': u'15-02-15 12:00'}, {u'count': 24, u'_id': u'15-02-14 14:00'}, {u'count': 44, u'_id': u'15-02-15 16:00'}, {u'count': 46, u'_id': u'15-02-14 09:00'}, {u'count': 9, u'_id': u'15-02-14 13:00'}, {u'count': 16, u'_id': u'15-02-15 11:00'}, {u'count': 24, u'_id': u'15-02-14 15:00'}, {u'count': 42, u'_id': u'15-02-14 12:00'}, {u'count': 13, u'_id': u'15-02-15 13:00'}]
+HOURS:
+{"15-02-14 09:00": 46}
+{"15-02-14 10:00": 55}
+{"15-02-14 11:00": 19}
+{"15-02-14 12:00": 42}
+{"15-02-14 13:00": 9}
+{"15-02-14 14:00": 24}
+{"15-02-14 15:00": 24}
+{"15-02-14 16:00": 29}
+{"15-02-15 09:00": 21}
+{"15-02-15 10:00": 56}
+{"15-02-15 11:00": 16}
+{"15-02-15 12:00": 66}
+{"15-02-15 13:00": 13}
+{"15-02-15 14:00": 13}
+{"15-02-15 15:00": 41}
+{"15-02-15 16:00": 44}
 
-[{u'count': 57, u'_id': {u'id': 15942706, u'name': u'xmlprague'}}]
+USERS:
+{u'count': 57, u'id': u'name': u'xmlprague'}
 
-
-[{u'count': 509, u'_id': u'xmlprague'},
- {u'count': 25, u'_id': u'XMLPrague'},
- {u'count': 23, u'_id': u'thetransformationsong'},
- {u'count': 17, u'_id': u'XProc'},
- {u'count': 9, u'_id': u'xproc'},
- {u'count': 8, u'_id': u'existdb'},
- {u'count': 7, u'_id': u'RDFa'}, 
- {u'count': 7, u'_id': u'CreditWhereDue'}, {
- u'count': 6, u'_id': u'FUCKYEAH'}, {u'count': 6, u'_id': u'BRILLIANT'}]
+HASHTAGS:
+{u'count': 509, u'_id': u'xmlprague'}
+{u'count': 25, u'_id': u'XMLPrague'}
+{u'count': 23, u'_id': u'thetransformationsong'}
+{u'count': 17, u'_id': u'XProc'}
+{u'count': 9, u'_id': u'xproc'}
+{u'count': 8, u'_id': u'existdb'}
+{u'count': 7, u'_id': u'RDFa'}
+{u'count': 7, u'_id': u'CreditWhereDue'}
+{u'count': 6, u'_id': u'FUCKYEAH'}
+{u'count': 6, u'_id': u'BRILLIANT'}

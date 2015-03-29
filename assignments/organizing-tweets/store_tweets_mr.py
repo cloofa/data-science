@@ -5,11 +5,10 @@ import datetime
 
 fname = "tweets-organized.json"
 out = open(fname,"w")
-out.write("[\n")
 
 def write(tweet_doc):
     out.write(json.dumps(tweet_doc).encode('utf8'))
-    out.write(',\n')
+    out.write('\n')
 def store_formatted_tweet(tweet):
     date = datetime.datetime.strptime(tweet['created_at'], '%a %b %d %H:%M:%S +0000 %Y') \
            + datetime.timedelta(hours=1)
@@ -40,5 +39,4 @@ for file in files:
     for twt in tweets_raw:
         store_formatted_tweet(twt)
 
-out.write("\n]\n")
 out.close()
