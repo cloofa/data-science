@@ -8,6 +8,8 @@ db = conn.hw3
 tweets = db.tweets
 hashtags = db.hashtags
 
+# I create strings of datetimes for all the datetime I am interested in querying
+# datetime created for every hour of both days between 0900 and 1600 local
 hours = range(9, 17)
 days  = range(14,16)
 query_dates = []
